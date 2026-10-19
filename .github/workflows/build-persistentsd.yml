@@ -34,7 +34,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Validate PowerShell template syntax
         shell: pwsh
@@ -71,7 +71,7 @@ jobs:
           Get-FileHash PersistentSD-build.zip -Algorithm SHA256 | Format-List
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: PersistentSD-Windows-build
           path: PersistentSD-build.zip
