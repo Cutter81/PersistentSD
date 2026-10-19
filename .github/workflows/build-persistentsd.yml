@@ -8,6 +8,8 @@ on:
       - 'PersistentSDManager.exe.manifest'
       - 'RazorBlade.ico'
       - 'Build-PersistentSD.bat'
+      - 'README.md'
+      - 'LICENSE'
       - '.github/workflows/build-persistentsd.yml'
   workflow_dispatch:
 
