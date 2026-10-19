@@ -27,7 +27,7 @@ This checklist is for validating a build on a disposable test setup before publi
 - [ ] Update an existing task in the same destination; verify a backup of the old script and task XML is created.
 - [ ] Update an existing task whose script is in the other supported destination; verify the prompt and backups are correct.
 - [ ] Test with an existing task whose action cannot be parsed or whose script is missing. Confirm the app does not silently claim the task is healthy.
-- [ ] Test a read-only/unwritable destination and a task-registration failure. Record whether preferences, script files, and the prior task remain consistent.
+- [ ] Test a read-only/unwritable destination and a task-registration failure. Confirm preferences are not saved on registration failure and the manager attempts to restore the prior script or remove a newly created script; record any recovery failure.
 - [ ] Confirm backups are readable and no previous script is deleted automatically.
 
 ## Drive-letter safety (use disposable test disks)
