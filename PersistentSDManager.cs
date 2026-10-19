@@ -147,7 +147,18 @@ internal sealed class MainForm : Form
     }
     private void LoadLocationPreference()
     {
-        try { string p = PreferencePath; if (File.Exists(p)) { string v = File.ReadAllText(p).Trim(); documentsLocation.Checked = v == "Documents"; profileLocation.Checked = v != "Documents"; } } catch { }
+        try
+        {
+            string p = PreferencePath;
+            if (!File.Exists(p)) return;
+            // Preferences are stored as three lines: location, device ID, and drive letter.
+            // Read only the location line so the saved device and letter do not affect this choice.
+            string[] values = File.ReadAllLines(p);
+            string location = values.Length > 0 ? values[0].Trim() : "Profile";
+            documentsLocation.Checked = location == "Documents";
+            profileLocation.Checked = location != "Documents";
+        }
+        catch { }
     }
     private void LoadSavedPreferences()
     {
