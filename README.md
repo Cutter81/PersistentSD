@@ -8,12 +8,12 @@ A lightweight Windows utility designed to configure a preferred drive letter and
 
 <img src="PersistentSD.png" alt="PersistentSD application window showing the scheduled task status" width="650">
 
-[Download v1.0](https://github.com/Cutter81/PersistentSD/releases/tag/v1.0) · [Report a problem](https://github.com/Cutter81/PersistentSD/issues)
+[Download latest release](https://github.com/Cutter81/PersistentSD/releases) · [Report a problem](https://github.com/Cutter81/PersistentSD/issues)
 
 </div>
 
-> [!WARNING]
-> **Read before installing:** PersistentSD may remove the selected drive letter from another non-protected volume to assign it to your chosen device. That can break shortcuts, applications, or other paths that depend on the previous letter. Double-check the disk and letter before confirming any changes.
+> [!IMPORTANT]
+> **Drive-letter safety:** The current runtime script checks whether the preferred letter is already assigned to a partition. If another partition owns it, PersistentSD logs the conflict and leaves that volume and its drive letter untouched. It does not force the reassignment. Always double-check the selected disk and preferred letter before installing.
 
 ## What PersistentSD is designed to do
 
@@ -34,8 +34,8 @@ The manager uses the Windows disk `UniqueId` to identify the selected device rat
 
 ### Option 1 — Download the release
 
-1. Open the [PersistentSD v1.0 release page](https://github.com/Cutter81/PersistentSD/releases/tag/v1.0).
-2. Download `PersistentSD-v1.0.zip` from the release assets.
+1. Open the [PersistentSD releases page](https://github.com/Cutter81/PersistentSD/releases).
+2. Download the ZIP attached to the release you intend to use.
 3. Extract the ZIP to a folder you can keep in place.
 4. Keep `PersistentSD.exe` and `PersistentSD.ps1` together in that extracted folder, then run the manager as **Administrator**.
 
@@ -70,7 +70,7 @@ Task Scheduler can also be opened from the app if you want to inspect the task d
 | **Device matching** | The script is designed to match the selected disk using its Windows `UniqueId`. If it cannot find exactly one matching disk, it should make no drive-letter changes. |
 | **Partition selection** | The script is designed to skip system, boot, and recovery partitions. Among eligible data partitions on the selected disk, it prefers one already using the chosen letter, then one with an existing drive letter, then the first eligible partition. |
 | **Protected partitions** | System, boot, and recovery partitions are intended to be excluded from reassignment. |
-| **Existing drive letters** | A preferred letter may be taken from another non-protected partition. Check what currently uses that letter first. |
+| **Existing drive letters** | If another partition already owns the preferred letter, the runtime script leaves it untouched and retries later. It does not remove the other partition's letter. |
 | **Backups** | Existing target scripts are backed up before replacement. When changing script locations, the previously referenced script is backed up where applicable. |
 | **Old files** | Previous scripts are not automatically deleted. Verify the new setup before manually removing any old copies. |
 | **Failures** | Backups are retained if a later step fails; do not assume the app has automatically rolled everything back. |
