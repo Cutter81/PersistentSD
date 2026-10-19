@@ -216,7 +216,9 @@ internal sealed class MainForm : Form
                 throw new InvalidOperationException("The script template contains unresolved configuration placeholders. No files were changed.");
             string backupPath = null;
             string backupDir = Path.Combine(destination, "PersistentSD-Backups", DateTime.Now.ToString("yyyyMMdd-HHmmss"));
-            if (File.Exists(targetScript) || (existingScript != null && File.Exists(existingScript)))
+            // Always create a recovery point before replacing an existing task, even when
+            // its script path cannot be resolved or the new target file does not exist yet.
+            if (existingTask || File.Exists(targetScript) || (existingScript != null && File.Exists(existingScript)))
             {
                 Directory.CreateDirectory(backupDir);
                 if (File.Exists(targetScript))
