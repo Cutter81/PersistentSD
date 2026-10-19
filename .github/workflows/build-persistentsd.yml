@@ -1,5 +1,16 @@
 name: Build PersistentSD
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'PersistentSDManager.cs'
+      - 'PersistentSD.ps1'
+      - 'PersistentSDManager.exe.manifest'
+      - 'RazorBlade.ico'
+      - 'Build-PersistentSD.bat'
+      - 'README.md'
+      - 'LICENSE'
+      - '.github/workflows/build-persistentsd.yml'
   push:
     branches: [main]
     paths:
