@@ -4,7 +4,7 @@
 
 **Keep your chosen drive letter assigned to the storage device you want.**
 
-A lightweight Windows utility that configures a preferred drive letter and maintains it with a scheduled task at startup.
+A lightweight Windows utility designed to configure a preferred drive letter and maintain that assignment with a scheduled task at startup.
 
 [Download v1.0](https://github.com/Cutter81/PersistentSD/releases/tag/v1.0) · [Report a problem](https://github.com/Cutter81/PersistentSD/issues)
 
@@ -13,12 +13,19 @@ A lightweight Windows utility that configures a preferred drive letter and maint
 > [!WARNING]
 > **Read before installing:** PersistentSD may remove the selected drive letter from another non-protected volume to assign it to your chosen device. That can break shortcuts, applications, or other paths that depend on the previous letter. Double-check the disk and letter before confirming any changes.
 
+## What PersistentSD is designed to do
+
+PersistentSD gives you a Windows Forms interface for selecting a storage disk and the drive letter you want it to use. It saves your preferences and sets up a PowerShell script to run through a scheduled task at startup under the **SYSTEM** account, helping reapply the chosen letter to the intended disk.
+
+The manager uses the Windows disk `UniqueId` to identify the selected device rather than relying only on its current drive letter. It also provides controls to install or update the task, check its status, open Task Scheduler, and remove the task.
+
 ## At a glance
 
 - **Choose the device** from the detected Windows storage disks.
 - **Choose a preferred letter** from D: to Z:.
 - **Install or update** a startup task that runs as SYSTEM.
 - **Check status** to inspect the scheduled task and the script it runs.
+- **Manage the task** from the app, including opening Task Scheduler or removing the task.
 - **Keep a safety trail** with backups of scripts being replaced and logs from the runtime script.
 
 ## Get started
@@ -56,8 +63,8 @@ Task Scheduler can also be opened from the app if you want to inspect the task d
 
 | Area | What to know |
 | --- | --- |
-| **Device matching** | The script matches the selected disk using its Windows `UniqueId`. If it cannot find exactly one matching disk, it makes no drive-letter changes. |
-| **Protected partitions** | System, boot, and recovery partitions are excluded from reassignment. |
+| **Device matching** | The script is designed to match the selected disk using its Windows `UniqueId`. If it cannot find exactly one matching disk, it should make no drive-letter changes. |
+| **Protected partitions** | System, boot, and recovery partitions are intended to be excluded from reassignment. |
 | **Existing drive letters** | A preferred letter may be taken from another non-protected partition. Check what currently uses that letter first. |
 | **Backups** | Existing target scripts are backed up before replacement. When changing script locations, the previously referenced script is backed up where applicable. |
 | **Old files** | Previous scripts are not automatically deleted. Verify the new setup before manually removing any old copies. |
@@ -78,9 +85,9 @@ Preferences are stored at `%LOCALAPPDATA%\PersistentSD\preferences.txt`. The sta
 | `PersistentSD.ps1` | PowerShell script template used by the manager |
 | `README.txt` | Additional project instructions |
 
-## Testing status
+## Testing notes
 
-The source package has **not been compiled or tested on a Windows machine in the development environment**. Build and verify it on your own Windows system before relying on it to manage drive letters. If an existing installation is working, leave it in place until you can safely test the rebuilt version.
+This README describes the software's intended behavior and documented safeguards; it is not a claim that every Windows version, disk layout, or failure scenario has been exhaustively tested. Before installing or updating the startup task, verify the selected disk and current drive-letter assignments, and read each confirmation prompt carefully.
 
 ## Feedback
 
