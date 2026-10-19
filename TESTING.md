@@ -41,6 +41,7 @@ This checklist is for validating a build on a disposable test setup before publi
 - [ ] Test a disk with multiple eligible partitions and verify the chosen partition matches the documented selection order.
 - [ ] Test a missing, duplicate, or changed disk UniqueId; confirm no drive-letter changes occur unless exactly one disk matches.
 - [ ] Inspect logs for useful error messages when storage queries or assignment attempts fail.
+- [ ] Simulate volume-arrival watcher registration failure where practical; confirm the task stays running and falls back to periodic retries rather than exiting.
 
 ## Release checks
 
