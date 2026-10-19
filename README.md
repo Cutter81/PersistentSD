@@ -72,7 +72,7 @@ Task Scheduler can also be opened from the app if you want to inspect the task d
 | **Protected partitions** | System, boot, and recovery partitions are intended to be excluded from reassignment. Validate unusual disk layouts before relying on the utility. |
 | **Existing drive letters** | If another partition already owns the preferred letter, the runtime script leaves it untouched and retries later. It does not remove the other partition's letter. |
 | **Backups** | Existing target scripts and scheduled-task XML are backed up before replacement when the manager can identify and read them. Backups are recovery copies, not an automatic rollback mechanism. |
-| **Failed updates** | If a later installation step fails, a script or preferences file may already have been written. Inspect Task Scheduler and the backup folder before retrying; do not assume the previous state was automatically restored. |
+| **Failed updates** | If task registration fails, the manager attempts to restore the previous target script (or remove a newly created one) and does not save new preferences. Recovery itself can fail; inspect the error message, Task Scheduler, and backup folder before retrying. If registration succeeds but later verification fails, inspect the task and script manually. |
 | **Old files** | Previous scripts are not automatically deleted. Verify the new setup before manually removing any old copies. |
 | **Disk state** | The script does not automatically bring an offline disk online or clear its read-only flag. |
 | **Logging** | Runtime activity is written to `PersistentSD.log` beside the generated script, subject to the script folder being writable. |
