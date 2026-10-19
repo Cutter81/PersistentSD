@@ -56,12 +56,10 @@ function Set-PreferredDriveLetter {
 
         $owner = Get-Partition -DriveLetter $script:PreferredLetter -ErrorAction SilentlyContinue
         if ($owner) {
-            if ($owner.IsSystem -or $owner.IsBoot -or $owner.Type -in @('System','Recovery','Reserved')) {
-                Write-Log ("Refusing to reclaim {0}: because it belongs to a protected system partition." -f $script:PreferredLetter)
-                return
-            }
-            Write-Log ("Reclaiming {0}: from disk {1}, partition {2}." -f $script:PreferredLetter, $owner.DiskNumber, $owner.PartitionNumber)
-            Remove-PartitionAccessPath -DiskNumber $owner.DiskNumber -PartitionNumber $owner.PartitionNumber -AccessPath ($script:PreferredLetter + ':') -ErrorAction Stop
+            # Never take a drive letter away from another volume. If it is occupied,
+            # leave everything as-is and wait for a later retry.
+            Write-Log ("Preferred letter {0}: is already in use by disk {1}, partition {2}; leaving it untouched." -f $script:PreferredLetter, $owner.DiskNumber, $owner.PartitionNumber)
+            return
         }
 
         Set-Partition -DiskNumber $disk.Number -PartitionNumber $target.PartitionNumber -NewDriveLetter $script:PreferredLetter -ErrorAction Stop
