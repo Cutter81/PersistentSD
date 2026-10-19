@@ -70,7 +70,7 @@ internal sealed class MainForm : Form
         var remove = MakeButton("Remove Task", 383, 225, 110, 40); remove.Click += RemoveTask;
         var scheduler = MakeButton("Task Scheduler", 504, 225, 145, 40); scheduler.Click += (s,e) => { try { Process.Start(new ProcessStartInfo("taskschd.msc") { UseShellExecute = true }); } catch (Exception ex) { MessageBox.Show(this, "Could not open Task Scheduler: " + ex.Message, TaskName, MessageBoxButtons.OK, MessageBoxIcon.Error); } };
         status.Left = 27; status.Top = 275; status.Width = 622; status.Height = 78; status.ForeColor = Color.LightGreen; status.Font = new Font("Segoe UI", 9); status.AutoSize = false; status.BorderStyle = BorderStyle.FixedSingle;
-        var note = new Label { Text = "New scripts go in the selected Scripts folder. Existing task actions are inspected first. The boot task runs as SYSTEM; the selected letter may be reassigned from another volume.", Left = 26, Top = 365, Width = 622, Height = 50, ForeColor = Color.Silver, Font = new Font("Segoe UI", 8) };
+        var note = new Label { Text = "New scripts go in the selected Scripts folder. Existing task actions are inspected first. If the preferred letter is already in use, PersistentSD leaves that volume untouched.", Left = 26, Top = 365, Width = 622, Height = 50, ForeColor = Color.Silver, Font = new Font("Segoe UI", 8) };
         Controls.AddRange(new Control[] { sub, dl, devices, refresh, ll, letters, destinationLabel, profileLocation, documentsLocation, install, check, remove, scheduler, status, note });
         LoadDevices(); RefreshStatus();
     }
@@ -251,6 +251,7 @@ internal sealed class MainForm : Form
                 if (verified != null && String.Equals(Path.GetFullPath(verified), Path.GetFullPath(targetScript), StringComparison.OrdinalIgnoreCase)) {
                     status.Text = "Installed and verified. Task: " + (existingTask ? existingName : TaskName) + " | Letter: " + letters.SelectedItem + (backupPath == null ? "" : " | Backup: " + backupPath);
                     status.ForeColor = Color.LightGreen;
+                    MessageBox.Show(this, "PersistentSD was installed and verified successfully.\n\nRestart Windows for the preferred drive-letter assignment to take effect at startup. If that letter is already being used by another volume, PersistentSD will leave that volume untouched and will not force the letter.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 } else {
                     status.Text = "Task registration returned success, but script path verification failed. Backup retained: " + (backupPath ?? "none");
                     status.ForeColor = Color.Khaki;
