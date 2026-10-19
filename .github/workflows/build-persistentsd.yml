@@ -9,6 +9,7 @@ on:
       - 'RazorBlade.ico'
       - 'Build-PersistentSD.bat'
       - 'README.md'
+      - 'TESTING.md'
       - 'LICENSE'
       - '.github/workflows/build-persistentsd.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'RazorBlade.ico'
       - 'Build-PersistentSD.bat'
       - 'README.md'
+      - 'TESTING.md'
       - 'LICENSE'
       - '.github/workflows/build-persistentsd.yml'
   workflow_dispatch:
