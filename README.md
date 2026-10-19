@@ -35,9 +35,9 @@ The manager uses the Windows disk `UniqueId` to identify the selected device rat
 ### Option 1 — Download the release
 
 1. Open the [PersistentSD v1.0 release page](https://github.com/Cutter81/PersistentSD/releases/tag/v1.0).
-2. Download `PersistentSD.exe` and the accompanying release information.
-3. Keep the application and its `PersistentSD.ps1` template together.
-4. Run the manager as **Administrator**.
+2. Download `PersistentSD.exe` from the release assets.
+3. Download the [`PersistentSD.ps1` script template](https://github.com/Cutter81/PersistentSD/blob/main/PersistentSD.ps1) from the repository.
+4. Keep the EXE and script template together, then run the manager as **Administrator**.
 
 ### Option 2 — Build from source
 
@@ -86,6 +86,7 @@ Preferences are stored at `%LOCALAPPDATA%\PersistentSD\preferences.txt`. The sta
 | `PersistentSDManager.exe.manifest` | Requests administrator privileges |
 | `RazorBlade.ico` | Application icon |
 | `PersistentSD.ps1` | PowerShell script template used by the manager |
+| `PersistentSD.png` | Application screenshot displayed above |
 
 ## Testing notes
 
