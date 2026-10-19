@@ -215,6 +215,8 @@ internal sealed class MainForm : Form
             if (generated.Contains("__DEVICE_UNIQUE_ID_BASE64__") || generated.Contains("__PREFERRED_LETTER__"))
                 throw new InvalidOperationException("The script template contains unresolved configuration placeholders. No files were changed.");
             string backupPath = null;
+            string targetScriptBackupPath = null;
+            bool targetScriptExisted = File.Exists(targetScript);
             string backupDir = Path.Combine(destination, "PersistentSD-Backups", DateTime.Now.ToString("yyyyMMdd-HHmmss"));
             // Always create a recovery point before replacing an existing task, even when
             // its script path cannot be resolved or the new target file does not exist yet.
@@ -225,6 +227,7 @@ internal sealed class MainForm : Form
                 {
                     backupPath = Path.Combine(backupDir, Path.GetFileName(targetScript) + ".bak");
                     File.Copy(targetScript, backupPath, false);
+                    targetScriptBackupPath = backupPath;
                 }
                 // If switching destinations, back up the old task's actual script too. Never remove it here.
                 if (existingScript != null && File.Exists(existingScript) && !String.Equals(Path.GetFullPath(existingScript), Path.GetFullPath(targetScript), StringComparison.OrdinalIgnoreCase))
@@ -242,11 +245,11 @@ internal sealed class MainForm : Form
                 }
             }
             File.WriteAllText(targetScript, generated, new UTF8Encoding(false));
-            SavePreferences(disk.Id, letters.SelectedItem.ToString().TrimEnd(':'));
             string xml = BuildTaskXml(targetScript);
             string temp = Path.Combine(Path.GetTempPath(), "PersistentSD-" + Guid.NewGuid().ToString("N") + ".xml"); File.WriteAllText(temp, xml, new UTF8Encoding(false));
             var p = Run("schtasks.exe", "/Create /TN " + Quote("\\" + (existingTask ? existingName : TaskName)) + " /XML " + Quote(temp) + " /F", false); try { File.Delete(temp); } catch { }
             if (p.ExitCode == 0) {
+                SavePreferences(disk.Id, letters.SelectedItem.ToString().TrimEnd(':'));
                 string verified = FindExistingScript();
                 if (verified != null && String.Equals(Path.GetFullPath(verified), Path.GetFullPath(targetScript), StringComparison.OrdinalIgnoreCase)) {
                     status.Text = "Installed and verified. Task: " + (existingTask ? existingName : TaskName) + " | Letter: " + letters.SelectedItem + (backupPath == null ? "" : " | Backup: " + backupPath);
@@ -258,7 +261,22 @@ internal sealed class MainForm : Form
                     MessageBox.Show(this, status.Text + "\n\nReview Task Scheduler before relying on this setup.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
-            else MessageBox.Show(this, "Task creation failed. The generated script was saved, but the task was not confirmed.\n\n" + p.Output + "\n\nRun this utility as Administrator.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            else {
+                string recovery = "";
+                try {
+                    if (targetScriptBackupPath != null && File.Exists(targetScriptBackupPath)) {
+                        File.Copy(targetScriptBackupPath, targetScript, true);
+                        recovery = " The previous script was restored from its backup.";
+                    } else if (!targetScriptExisted && File.Exists(targetScript) &&
+                               (!existingTask || existingScript == null || !String.Equals(Path.GetFullPath(existingScript), Path.GetFullPath(targetScript), StringComparison.OrdinalIgnoreCase))) {
+                        File.Delete(targetScript);
+                        recovery = " The newly generated script was removed.";
+                    }
+                } catch (Exception recoveryError) {
+                    recovery = " Automatic script recovery failed: " + recoveryError.Message;
+                }
+                MessageBox.Show(this, "Task creation failed. Preferences were not updated.\n\n" + p.Output + "\n\n" + recovery + "\n\nRun this utility as Administrator and inspect the backup folder before retrying.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             RefreshStatus();
         } catch (Exception ex) { MessageBox.Show(this, ex.Message, TaskName, MessageBoxButtons.OK, MessageBoxIcon.Error); }
     }
