@@ -64,6 +64,7 @@ Task Scheduler can also be opened from the app if you want to inspect the task d
 | Area | What to know |
 | --- | --- |
 | **Device matching** | The script is designed to match the selected disk using its Windows `UniqueId`. If it cannot find exactly one matching disk, it should make no drive-letter changes. |
+| **Partition selection** | The script is designed to skip system, boot, and recovery partitions. Among eligible data partitions on the selected disk, it prefers one already using the chosen letter, then one with an existing drive letter, then the first eligible partition. |
 | **Protected partitions** | System, boot, and recovery partitions are intended to be excluded from reassignment. |
 | **Existing drive letters** | A preferred letter may be taken from another non-protected partition. Check what currently uses that letter first. |
 | **Backups** | Existing target scripts are backed up before replacement. When changing script locations, the previously referenced script is backed up where applicable. |
@@ -83,7 +84,6 @@ Preferences are stored at `%LOCALAPPDATA%\PersistentSD\preferences.txt`. The sta
 | `PersistentSDManager.exe.manifest` | Requests administrator privileges |
 | `RazorBlade.ico` | Application icon |
 | `PersistentSD.ps1` | PowerShell script template used by the manager |
-| `README.txt` | Additional project instructions |
 
 ## Testing notes
 
