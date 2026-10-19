@@ -71,13 +71,22 @@ function Set-PreferredDriveLetter {
 Write-Log 'PersistentSD started.'
 # Allow Windows storage discovery to settle; retry for up to about one minute.
 for ($attempt = 0; $attempt -lt 12; $attempt++) {
-    Set-PreferredDriveLetter
-    $disk = Get-TargetDisk
-    if ($disk) {
-        $hasLetter = @(Get-Partition -DiskNumber $disk.Number -ErrorAction SilentlyContinue | Where-Object { [string]$_.DriveLetter -eq $script:PreferredLetter }).Count -gt 0
-        if ($hasLetter) { break }
+    try {
+        Set-PreferredDriveLetter
+        # Storage queries can fail transiently while Windows discovers a device.
+        # Keep the retry loop alive so the event watcher can still be registered.
+        $disk = Get-TargetDisk
+        if ($disk) {
+            $hasLetter = @(Get-Partition -DiskNumber $disk.Number -ErrorAction Stop | Where-Object {
+                [string]$_.DriveLetter -eq $script:PreferredLetter
+            }).Count -gt 0
+            if ($hasLetter) { break }
+        }
     }
-    Start-Sleep -Seconds 5
+    catch {
+        Write-Log ("Startup retry {0}/12 failed: {1}" -f ($attempt + 1), $_.Exception.Message)
+    }
+    if ($attempt -lt 11) { Start-Sleep -Seconds 5 }
 }
 
 try {
