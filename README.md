@@ -4,96 +4,100 @@
 
 **Keep your chosen drive letter assigned to the storage device you want.**
 
-A lightweight Windows utility designed to configure a preferred drive letter and maintain that assignment with a scheduled task at startup.
+A lightweight Windows utility that configures a preferred drive letter for a selected storage device and attempts to maintain that assignment at startup.
 
-<img src="PersistentSD.png" alt="PersistentSD application window showing the scheduled task status" width="650">
+<img src="PersistentSD.png" alt="PersistentSD application window showing scheduled-task status" width="650">
 
-[Download latest release](https://github.com/Cutter81/PersistentSD/releases) · [Report a problem](https://github.com/Cutter81/PersistentSD/issues)
+[**Download PersistentSD**](https://github.com/Cutter81/PersistentSD/releases/latest) · [View all releases](https://github.com/Cutter81/PersistentSD/releases) · [Report a problem](https://github.com/Cutter81/PersistentSD/issues)
 
 </div>
 
 > [!IMPORTANT]
-> **Drive-letter safety:** The current runtime script checks whether the preferred letter is already assigned to a partition. If another partition owns it, PersistentSD logs the conflict and leaves that volume and its drive letter untouched. It does not force the reassignment. Always double-check the selected disk and preferred letter before installing.
+> **Drive-letter safety:** If another partition already owns the preferred letter, PersistentSD logs the conflict and leaves that partition and its drive letter untouched. It does not forcibly take the letter away. Double-check the selected disk and preferred letter before installing.
 
-## What PersistentSD is designed to do
+> [!WARNING]
+> **Runtime validation is incomplete.** Automated checks confirm PowerShell syntax, C# compilation, and ZIP packaging. They do not prove that installation, startup, reconnect handling, or real drive-letter assignment works correctly on every Windows system. Review [Testing status](#testing-status) before relying on the utility.
 
-PersistentSD gives you a Windows Forms interface for selecting a storage disk and the drive letter you want it to use. It saves your preferences and sets up a PowerShell script to run through a scheduled task at startup under the **SYSTEM** account, helping reapply the chosen letter to the intended disk.
+## What PersistentSD does
 
-The manager uses the Windows disk `UniqueId` to identify the selected device rather than relying only on its current drive letter. It also provides controls to install or update the task, check its status, open Task Scheduler, and remove the task.
+PersistentSD provides a Windows Forms interface for selecting a storage disk and preferred drive letter. It saves your configuration and creates a PowerShell script launched by a scheduled task at startup under the **SYSTEM** account.
 
-## At a glance
+The generated script identifies the selected device using its Windows disk `UniqueId`, rather than relying only on its current drive letter. The manager can install or update the task, inspect basic task status, open Task Scheduler, and remove the task.
 
-- **Choose the device** from the detected Windows storage disks.
-- **Choose a preferred letter** from D: to Z:.
-- **Install or update** a startup task that runs as SYSTEM.
-- **Check status** to inspect whether the task is registered and whether its script path can be resolved. This is not a complete health check of runtime drive assignment.
-- **Manage the task** from the app, including opening Task Scheduler or removing the task.
-- **Keep a safety trail** with backups of scripts being replaced and logs from the runtime script.
+## Features
 
-## Get started
+- **Select a storage device** from the detected Windows disks.
+- **Choose a preferred drive letter** from D: through Z:.
+- **Configure startup handling** with a scheduled task running as SYSTEM.
+- **Inspect task status** and check whether the configured script path can be resolved. This is not a complete runtime health check.
+- **Manage the scheduled task** from the application.
+- **Retain recovery evidence** through backups of replaced scripts/task XML and runtime logs.
 
-### Option 1 — Download the release
+## Download and install
 
-1. Open the [PersistentSD releases page](https://github.com/Cutter81/PersistentSD/releases).
-2. Download the ZIP attached to the release you intend to use.
-3. Extract the ZIP to a folder you can keep in place.
-4. Keep `PersistentSD.exe` and `PersistentSD.ps1` together in that extracted folder, then run the manager as **Administrator**.
+1. Open the [latest PersistentSD release](https://github.com/Cutter81/PersistentSD/releases/latest).
+2. Download `PersistentSD-v1.1.zip` (or the ZIP attached to the version you intend to use).
+3. Extract the ZIP into a folder you can keep in place.
+4. Keep `PersistentSD.exe` and `PersistentSD.ps1` together in that folder.
+5. Run `PersistentSD.exe` as **Administrator** and read each confirmation prompt carefully.
 
-The ZIP includes the application, script template, license, and README. You do not need to download the EXE or script separately.
+The release ZIP includes the application, PowerShell template, README, and license. You do not need to download the EXE or script separately. Do not move or delete the script after installing the task unless you update or remove the task first.
 
-### Option 2 — Build from source
+## Build from source
 
 **Requirements:** Windows and the .NET Framework C# compiler (`csc.exe`).
 
-1. Download or clone this repository.
+1. Clone or download this repository.
 2. Keep `PersistentSD.ps1` beside the source and build files.
 3. Run `Build-PersistentSD.bat` on Windows.
 4. After a successful build, launch `PersistentSD.exe` as **Administrator**.
 
-The build script looks for the .NET Framework compiler in the standard 64-bit and 32-bit Windows locations. GitHub Actions also compiles and packages the app, but that automated build does not exercise real disk assignment behavior.
+The build script searches standard 64-bit and 32-bit .NET Framework compiler locations. GitHub Actions also compiles and packages the app, but that automated build does not exercise actual storage changes.
 
 ## How to use it
 
 1. Open PersistentSD as Administrator.
 2. Refresh the device list and select the intended storage device.
-3. Select the preferred drive letter (**D:** through **Z:**).
-4. Choose one of the offered Scripts folders.
-5. Select **Save / Install / Update** and read the confirmation prompts carefully.
-6. Use **Check Status** to review whether the task and its script path can be found.
-
-Task Scheduler can also be opened from the app if you want to inspect the task directly.
+3. Select a preferred drive letter from **D:** through **Z:**.
+4. Choose one of the offered script folders.
+5. Select **Save / Install / Update** and review the confirmation prompts.
+6. Use **Check Status** to inspect the registered task and its configured script path.
+7. Open Task Scheduler from the app if you want to inspect the task directly.
 
 ## Safety and behavior
 
 | Area | What to know |
 | --- | --- |
 | **Device matching** | The script matches the selected disk using its Windows `UniqueId`. If it cannot find exactly one matching disk, it should make no drive-letter changes. |
-| **Partition selection** | The script skips partitions marked as system, boot, or recovery and certain partition types. Among eligible data partitions on the selected disk, it prefers one already using the chosen letter, then one with an existing drive letter, then the first eligible partition. |
-| **Protected partitions** | System, boot, and recovery partitions are intended to be excluded from reassignment. Validate unusual disk layouts before relying on the utility. |
-| **Existing drive letters** | If another partition already owns the preferred letter, the runtime script leaves it untouched and retries later. It does not remove the other partition's letter. |
+| **Partition selection** | System, boot, recovery, and certain reserved partition types are intended to be excluded. Among eligible data partitions, the script prefers one already using the selected letter, then one with an existing drive letter, then the first eligible partition. |
+| **Protected partitions** | Protected-partition handling is intended as a safeguard, not a substitute for validating unusual disk layouts. |
+| **Letter conflicts** | If another partition owns the preferred letter, the script leaves that volume untouched and retries later; it does not remove the other partition's letter. |
 | **Backups** | Existing target scripts and scheduled-task XML are backed up before replacement when the manager can identify and read them. Backups are recovery copies, not an automatic rollback mechanism. |
-| **Failed updates** | If task registration fails, the manager attempts to restore the previous target script (or remove a newly created one) and does not save new preferences. Recovery itself can fail; inspect the error message, Task Scheduler, and backup folder before retrying. If registration succeeds but later verification fails, inspect the task and script manually. |
-| **Old files** | Previous scripts are not automatically deleted. Verify the new setup before manually removing any old copies. |
+| **Failed updates** | If task registration fails, the manager attempts to restore the previous script or remove a newly created script and does not save new preferences. Recovery itself can fail. If registration succeeds but later verification or preference saving fails, inspect the warning, Task Scheduler, script path, and backups manually. |
+| **Old files** | Previous scripts are not automatically deleted. Verify the new setup before manually removing old copies. |
 | **Disk state** | The script does not automatically bring an offline disk online or clear its read-only flag. |
-| **Logging** | Runtime activity is written to `PersistentSD.log` beside the generated script, subject to the script folder being writable. |
+| **Logging** | Runtime activity is written to `PersistentSD.log` beside the generated script, if that folder is writable. |
 
-Preferences are stored at `%LOCALAPPDATA%\PersistentSD\preferences.txt`. The startup task runs as **SYSTEM**, so its configured script must remain at the registered path and accessible to that account. The user-profile preference file is not the runtime task's source of truth; the generated script contains the selected device ID and drive letter.
+Preferences are stored at `%LOCALAPPDATA%\PersistentSD\preferences.txt`. The startup task runs as **SYSTEM**, so the generated script must remain at the registered path and be accessible to that account. The task uses the selected device ID and drive letter embedded in the generated script; the user-profile preferences file is not the runtime task's source of truth.
 
 ## Testing status
 
-The automated workflow verifies that the C# application compiles and that a ZIP can be packaged. It does not run the application or validate Windows storage changes. See the [manual Windows test plan](TESTING.md) for installation, failure-recovery, drive-letter conflict, and device reconnect checks. Treat behavior as unverified until the relevant tests have actually been run on a test system.
+The automated workflow checks PowerShell template syntax, compiles the C# application, and creates a ZIP. It does **not** launch the GUI, install/remove a task, or validate actual drive-letter assignment, startup behavior, or device reconnects.
+
+Those behaviors remain unverified until tested on Windows using the exact release ZIP. Follow the [manual Windows test plan](TESTING.md), record skipped or failed checks, and do not treat a successful build as proof of runtime correctness.
 
 ## Project files
 
 | File | Purpose |
 | --- | --- |
-| `PersistentSDManager.cs` | Windows Forms configuration interface and scheduled-task management |
+| `PersistentSDManager.cs` | Windows Forms interface and scheduled-task management |
 | `Build-PersistentSD.bat` | Builds the Windows application |
 | `PersistentSDManager.exe.manifest` | Requests administrator privileges |
 | `RazorBlade.ico` | Application icon |
-| `PersistentSD.ps1` | PowerShell script template used by the manager |
-| `PersistentSD.png` | Application screenshot displayed above |
+| `PersistentSD.ps1` | PowerShell runtime script template |
+| `PersistentSD.png` | Application screenshot shown above |
 | `TESTING.md` | Manual Windows validation checklist |
+| `LICENSE` | MIT license |
 
 ## Feedback
 

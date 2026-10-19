@@ -1,4 +1,5 @@
 name: Build PersistentSD
+
 on:
   pull_request:
     branches: [main]
@@ -7,6 +8,7 @@ on:
       - 'PersistentSD.ps1'
       - 'PersistentSDManager.exe.manifest'
       - 'RazorBlade.ico'
+      - 'PersistentSD.png'
       - 'Build-PersistentSD.bat'
       - 'README.md'
       - 'TESTING.md'
@@ -19,6 +21,7 @@ on:
       - 'PersistentSD.ps1'
       - 'PersistentSDManager.exe.manifest'
       - 'RazorBlade.ico'
+      - 'PersistentSD.png'
       - 'Build-PersistentSD.bat'
       - 'README.md'
       - 'TESTING.md'
@@ -62,12 +65,25 @@ jobs:
           if (-not (Test-Path 'PersistentSD.exe')) { throw 'Compiler reported success but EXE was not created.' }
           Get-FileHash PersistentSD.exe -Algorithm SHA256 | Format-List
 
-      - name: Package runnable build and script template
+      - name: Package runnable build and documentation
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Copy-Item PersistentSD.exe, PersistentSD.ps1, LICENSE, README.md -Destination dist
           Compress-Archive -Path dist\* -DestinationPath PersistentSD-build.zip -Force
+          if (-not (Test-Path 'PersistentSD-build.zip')) { throw 'Release ZIP was not created.' }
+          $zip = [System.IO.Compression.ZipFile]::OpenRead((Resolve-Path 'PersistentSD-build.zip'))
+          try {
+            $required = @('PersistentSD.exe', 'PersistentSD.ps1', 'LICENSE', 'README.md')
+            $actual = @($zip.Entries | ForEach-Object { $_.FullName })
+            foreach ($item in $required) {
+              if ($item -notin $actual) { throw "Release ZIP is missing required file: $item" }
+            }
+            Write-Output "Release ZIP contents validated: $($actual -join ', ')"
+          }
+          finally {
+            $zip.Dispose()
+          }
           Get-FileHash PersistentSD-build.zip -Algorithm SHA256 | Format-List
 
       - name: Upload build artifact
