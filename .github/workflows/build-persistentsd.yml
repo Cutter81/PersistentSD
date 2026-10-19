@@ -36,6 +36,18 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Validate PowerShell template syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'PersistentSD.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            throw 'PowerShell template contains syntax errors.'
+          }
+          Write-Output 'PowerShell template syntax is valid.'
+
       - name: Compile Windows Forms application
         shell: pwsh
         run: |
