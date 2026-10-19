@@ -35,9 +35,11 @@ The manager uses the Windows disk `UniqueId` to identify the selected device rat
 ### Option 1 — Download the release
 
 1. Open the [PersistentSD v1.0 release page](https://github.com/Cutter81/PersistentSD/releases/tag/v1.0).
-2. Download `PersistentSD.exe` from the release assets.
-3. Download the [`PersistentSD.ps1` script template](https://github.com/Cutter81/PersistentSD/blob/main/PersistentSD.ps1) from the repository.
-4. Keep the EXE and script template together, then run the manager as **Administrator**.
+2. Download `PersistentSD-v1.0.zip` from the release assets.
+3. Extract the ZIP to a folder you can keep in place.
+4. Keep `PersistentSD.exe` and `PersistentSD.ps1` together in that extracted folder, then run the manager as **Administrator**.
+
+The ZIP includes the application, script template, license, and quick-start instructions. You do not need to download the EXE or script separately.
 
 ### Option 2 — Build from source
 
