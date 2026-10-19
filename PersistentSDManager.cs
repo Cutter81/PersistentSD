@@ -265,7 +265,7 @@ internal sealed class MainForm : Form
     {
         string p = SecurityElementEscape(path);
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + "<Task version=\"1.2\" xmlns=\"http://schemas.microsoft.com/windows/2004/02/mit/task\">\r\n" +
-" <RegistrationInfo><Author>PersistentSD</Author><URI>\\PersistentSD</URI></RegistrationInfo>\r\n" + " <Triggers><BootTrigger><Enabled>true</Enabled></BootTrigger></Triggers>\r\n" +
+" <RegistrationInfo><Author>PersistentSD</Author><URI>\\Persistent SD</URI></RegistrationInfo>\r\n" + " <Triggers><BootTrigger><Enabled>true</Enabled></BootTrigger></Triggers>\r\n" +
 " <Principals><Principal id=\"Author\"><UserId>S-1-5-18</UserId><RunLevel>HighestAvailable</RunLevel></Principal></Principals>\r\n" +
 " <Settings><MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy><DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries><StopIfGoingOnBatteries>false</StopIfGoingOnBatteries><AllowHardTerminate>true</AllowHardTerminate><StartWhenAvailable>true</StartWhenAvailable><RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable><AllowStartOnDemand>true</AllowStartOnDemand><Enabled>true</Enabled><Hidden>false</Hidden><RunOnlyIfIdle>false</RunOnlyIfIdle><WakeToRun>false</WakeToRun><ExecutionTimeLimit>PT0S</ExecutionTimeLimit><Priority>7</Priority></Settings>\r\n" +
 " <Actions Context=\"Author\"><Exec><Command>PowerShell.exe</Command><Arguments>-NoProfile -NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File &quot;" + p + "&quot;</Arguments></Exec></Actions>\r\n</Task>";
