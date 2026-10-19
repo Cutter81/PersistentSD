@@ -249,16 +249,23 @@ internal sealed class MainForm : Form
             string temp = Path.Combine(Path.GetTempPath(), "PersistentSD-" + Guid.NewGuid().ToString("N") + ".xml"); File.WriteAllText(temp, xml, new UTF8Encoding(false));
             var p = Run("schtasks.exe", "/Create /TN " + Quote("\\" + (existingTask ? existingName : TaskName)) + " /XML " + Quote(temp) + " /F", false); try { File.Delete(temp); } catch { }
             if (p.ExitCode == 0) {
-                SavePreferences(disk.Id, letters.SelectedItem.ToString().TrimEnd(':'));
+                // Task registration succeeded. Saving preferences is separate; report a
+                // preference failure accurately without implying the task was not installed.
+                string preferenceWarning = "";
+                try { SavePreferences(disk.Id, selectedLetter.TrimEnd(':')); }
+                catch (Exception preferenceError) {
+                    preferenceWarning = "\\n\\nWARNING: The task was registered, but preferences could not be saved: " + preferenceError.Message +
+                        "\\nThe generated script still contains the selected device ID and drive letter. Resolve the error, then save preferences again.";
+                }
                 string verified = FindExistingScript();
                 if (verified != null && String.Equals(Path.GetFullPath(verified), Path.GetFullPath(targetScript), StringComparison.OrdinalIgnoreCase)) {
-                    status.Text = "Installed and verified. Task: " + (existingTask ? existingName : TaskName) + " | Letter: " + letters.SelectedItem + (backupPath == null ? "" : " | Backup: " + backupPath);
-                    status.ForeColor = Color.LightGreen;
-                    MessageBox.Show(this, "PersistentSD was installed and verified successfully.\n\nRestart Windows for the preferred drive-letter assignment to take effect at startup. If that letter is already being used by another volume, PersistentSD will leave that volume untouched and will not force the letter.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    status.Text = "Task registered and script path verified. Task: " + (existingTask ? existingName : TaskName) + " | Letter: " + selectedLetter + (backupPath == null ? "" : " | Backup: " + backupPath);
+                    status.ForeColor = preferenceWarning.Length == 0 ? Color.LightGreen : Color.Khaki;
+                    MessageBox.Show(this, "PersistentSD task registration and script path verification succeeded." + preferenceWarning + "\\n\\nRestart Windows for the preferred drive-letter assignment to take effect at startup. If that letter is already being used by another volume, PersistentSD will leave that volume untouched and will not force the letter.", TaskName, MessageBoxButtons.OK, preferenceWarning.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
                 } else {
-                    status.Text = "Task registration returned success, but script path verification failed. Backup retained: " + (backupPath ?? "none");
+                    status.Text = "Task registration succeeded, but script path verification failed. Backup retained: " + (backupPath ?? "none");
                     status.ForeColor = Color.Khaki;
-                    MessageBox.Show(this, status.Text + "\n\nReview Task Scheduler before relying on this setup.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, status.Text + preferenceWarning + "\\n\\nThe task may already be active. Inspect Task Scheduler and its action before retrying; do not assume the task was rolled back.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else {
