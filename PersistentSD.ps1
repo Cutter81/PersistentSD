@@ -71,31 +71,58 @@ function Set-PreferredDriveLetter {
 Write-Log 'PersistentSD started.'
 # Allow Windows storage discovery to settle; retry for up to about one minute.
 for ($attempt = 0; $attempt -lt 12; $attempt++) {
-    Set-PreferredDriveLetter
-    $disk = Get-TargetDisk
-    if ($disk) {
-        $hasLetter = @(Get-Partition -DiskNumber $disk.Number -ErrorAction SilentlyContinue | Where-Object { [string]$_.DriveLetter -eq $script:PreferredLetter }).Count -gt 0
-        if ($hasLetter) { break }
+    try {
+        Set-PreferredDriveLetter
+        # Storage queries can fail transiently while Windows discovers a device.
+        # Keep the retry loop alive so the event watcher can still be registered.
+        $disk = Get-TargetDisk
+        if ($disk) {
+            $hasLetter = @(Get-Partition -DiskNumber $disk.Number -ErrorAction Stop | Where-Object {
+                [string]$_.DriveLetter -eq $script:PreferredLetter
+            }).Count -gt 0
+            if ($hasLetter) { break }
+        }
     }
-    Start-Sleep -Seconds 5
+    catch {
+        Write-Log ("Startup retry {0}/12 failed: {1}" -f ($attempt + 1), $_.Exception.Message)
+    }
+    if ($attempt -lt 11) { Start-Sleep -Seconds 5 }
+}
+
+$watcherRegistered = $false
+try {
+    Register-WmiEvent -Class Win32_VolumeChangeEvent -SourceIdentifier $script:EventSource -ErrorAction Stop | Out-Null
+    $watcherRegistered = $true
+    Write-Log 'Volume arrival watcher registered.'
+}
+catch {
+    # A watcher failure must not terminate the task. Periodic retries still allow
+    # the selected device to receive its preferred letter when it becomes available.
+    Write-Log ("Volume arrival watcher registration failed; using periodic retries: {0}" -f $_.Exception.Message)
 }
 
 try {
-    Register-WmiEvent -Class Win32_VolumeChangeEvent -SourceIdentifier $script:EventSource -ErrorAction Stop | Out-Null
-    Write-Log 'Volume arrival watcher registered.'
     while ($true) {
-        $event = Wait-Event -SourceIdentifier $script:EventSource -Timeout 60
-        if ($event) {
-            if ($event.SourceEventArgs.NewEvent.EventType -eq 2) {
-                Start-Sleep -Seconds 2
+        if ($watcherRegistered) {
+            $event = Wait-Event -SourceIdentifier $script:EventSource -Timeout 60
+            if ($event) {
+                if ($event.SourceEventArgs.NewEvent.EventType -eq 2) {
+                    Start-Sleep -Seconds 2
+                    Set-PreferredDriveLetter
+                }
+                Remove-Event -EventIdentifier $event.EventIdentifier -ErrorAction SilentlyContinue
+            } else {
+                # Periodic retry also covers cases where Windows misses an arrival event.
                 Set-PreferredDriveLetter
             }
-            Remove-Event -EventIdentifier $event.EventIdentifier -ErrorAction SilentlyContinue
         } else {
-            # Periodic retry also covers cases where Windows misses an arrival event.
+            # Keep running even if WMI event registration is unavailable.
+            Start-Sleep -Seconds 60
             Set-PreferredDriveLetter
         }
     }
 }
-catch { Write-Log ("Watcher error: {0}" -f $_.Exception.Message); exit 1 }
-finally { Unregister-Event -SourceIdentifier $script:EventSource -ErrorAction SilentlyContinue }
+catch { Write-Log ("Runtime retry loop error: {0}" -f $_.Exception.Message); exit 1 }
+finally {
+    if ($watcherRegistered) { Unregister-Event -SourceIdentifier $script:EventSource -ErrorAction SilentlyContinue }
+}

@@ -1,5 +1,17 @@
 name: Build PersistentSD
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'PersistentSDManager.cs'
+      - 'PersistentSD.ps1'
+      - 'PersistentSDManager.exe.manifest'
+      - 'RazorBlade.ico'
+      - 'Build-PersistentSD.bat'
+      - 'README.md'
+      - 'TESTING.md'
+      - 'LICENSE'
+      - '.github/workflows/build-persistentsd.yml'
   push:
     branches: [main]
     paths:
@@ -8,6 +20,9 @@ on:
       - 'PersistentSDManager.exe.manifest'
       - 'RazorBlade.ico'
       - 'Build-PersistentSD.bat'
+      - 'README.md'
+      - 'TESTING.md'
+      - 'LICENSE'
       - '.github/workflows/build-persistentsd.yml'
   workflow_dispatch:
 
@@ -19,7 +34,19 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Validate PowerShell template syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'PersistentSD.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            throw 'PowerShell template contains syntax errors.'
+          }
+          Write-Output 'PowerShell template syntax is valid.'
 
       - name: Compile Windows Forms application
         shell: pwsh
@@ -44,7 +71,7 @@ jobs:
           Get-FileHash PersistentSD-build.zip -Algorithm SHA256 | Format-List
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: PersistentSD-Windows-build
           path: PersistentSD-build.zip
