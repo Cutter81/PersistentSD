@@ -236,8 +236,9 @@ internal sealed class MainForm : Form
                 if (existingTask)
                 {
                     var oldXml = Run("schtasks.exe", "/Query /TN " + Quote("\\" + existingName) + " /XML", false);
-                    if (oldXml.ExitCode == 0 && oldXml.Output.IndexOf("<Task", StringComparison.OrdinalIgnoreCase) >= 0)
-                        File.WriteAllText(Path.Combine(backupDir, "ScheduledTask.xml"), ExtractXml(oldXml.Output), new UTF8Encoding(false));
+                    if (oldXml.ExitCode != 0 || oldXml.Output.IndexOf("<Task", StringComparison.OrdinalIgnoreCase) < 0)
+                        throw new InvalidOperationException("Could not back up the existing scheduled task XML. The task was not replaced. " + oldXml.Output);
+                    File.WriteAllText(Path.Combine(backupDir, "ScheduledTask.xml"), ExtractXml(oldXml.Output), new UTF8Encoding(false));
                 }
             }
             File.WriteAllText(targetScript, generated, new UTF8Encoding(false));
