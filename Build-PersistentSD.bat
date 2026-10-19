@@ -6,6 +6,7 @@ set "CSC=%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 if not exist "%CSC%" set "CSC=%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe"
 
 if not exist "%CSC%" goto NoCompiler
+if not exist "PersistentSD.ps1" goto NoTemplate
 
 "%CSC%" /nologo /target:winexe /platform:anycpu /optimize+ /win32icon:"RazorBlade.ico" /win32manifest:"PersistentSDManager.exe.manifest" /reference:System.dll /reference:System.Drawing.dll /reference:System.Windows.Forms.dll /out:"PersistentSD.exe" "PersistentSDManager.cs"
 
@@ -13,11 +14,17 @@ if errorlevel 1 goto BuildFailed
 
 echo.
 echo Build successful: PersistentSD.exe
+echo Keep PersistentSD.ps1 beside the application as its generation template.
 pause
 exit /b 0
 
 :NoCompiler
 echo ERROR: .NET Framework C# compiler csc.exe was not found.
+pause
+exit /b 1
+
+:NoTemplate
+echo ERROR: PersistentSD.ps1 template was not found.
 pause
 exit /b 1
 
