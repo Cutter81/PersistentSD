@@ -6,6 +6,8 @@
 
 A lightweight Windows utility designed to configure a preferred drive letter and maintain that assignment with a scheduled task at startup.
 
+<img src="PersistentSD.png" alt="PersistentSD application window showing the scheduled task status" width="650">
+
 [Download v1.0](https://github.com/Cutter81/PersistentSD/releases/tag/v1.0) · [Report a problem](https://github.com/Cutter81/PersistentSD/issues)
 
 </div>
