@@ -254,18 +254,18 @@ internal sealed class MainForm : Form
                 string preferenceWarning = "";
                 try { SavePreferences(disk.Id, selectedLetter.TrimEnd(':')); }
                 catch (Exception preferenceError) {
-                    preferenceWarning = "\\n\\nWARNING: The task was registered, but preferences could not be saved: " + preferenceError.Message +
-                        "\\nThe generated script still contains the selected device ID and drive letter. Resolve the error, then save preferences again.";
+                    preferenceWarning = "\n\nWARNING: The task was registered, but preferences could not be saved: " + preferenceError.Message +
+                        "\nThe generated script still contains the selected device ID and drive letter. Resolve the error, then save preferences again.";
                 }
                 string verified = FindExistingScript();
                 if (verified != null && String.Equals(Path.GetFullPath(verified), Path.GetFullPath(targetScript), StringComparison.OrdinalIgnoreCase)) {
                     status.Text = "Task registered and script path verified. Task: " + (existingTask ? existingName : TaskName) + " | Letter: " + selectedLetter + (backupPath == null ? "" : " | Backup: " + backupPath);
                     status.ForeColor = preferenceWarning.Length == 0 ? Color.LightGreen : Color.Khaki;
-                    MessageBox.Show(this, "PersistentSD task registration and script path verification succeeded." + preferenceWarning + "\\n\\nRestart Windows for the preferred drive-letter assignment to take effect at startup. If that letter is already being used by another volume, PersistentSD will leave that volume untouched and will not force the letter.", TaskName, MessageBoxButtons.OK, preferenceWarning.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+                    MessageBox.Show(this, "PersistentSD task registration and script path verification succeeded." + preferenceWarning + "\n\nRestart Windows for the preferred drive-letter assignment to take effect at startup. If that letter is already being used by another volume, PersistentSD will leave that volume untouched and will not force the letter.", TaskName, MessageBoxButtons.OK, preferenceWarning.Length == 0 ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
                 } else {
                     status.Text = "Task registration succeeded, but script path verification failed. Backup retained: " + (backupPath ?? "none");
                     status.ForeColor = Color.Khaki;
-                    MessageBox.Show(this, status.Text + preferenceWarning + "\\n\\nThe task may already be active. Inspect Task Scheduler and its action before retrying; do not assume the task was rolled back.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(this, status.Text + preferenceWarning + "\n\nThe task may already be active. Inspect Task Scheduler and its action before retrying; do not assume the task was rolled back.", TaskName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             else {
